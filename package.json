@@ -1,0 +1,22 @@
+{
+  "name": "solvian",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@stripe/stripe-js": "^9.5.0",
+    "@supabase/auth-helpers-nextjs": "^0.15.0",
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "^2.105.4",
+    "googleapis": "^172.0.0",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "stripe": "^22.1.1"
+  }
+}
