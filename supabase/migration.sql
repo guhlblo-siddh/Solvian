@@ -1,51 +1,56 @@
--- Run this in your Supabase SQL Editor
+-- Run this in Supabase SQL Editor
 
--- Auto Reply Settings Table
-create table if not exists auto_reply_settings (
-  id            uuid default gen_random_uuid() primary key,
-  email         text unique not null,
-  enabled       boolean default false,
-  tone          text default 'professional',
-  business_name text default '',
-  business_type text default 'local service',
-  language      text default 'auto',
-  signature     text default '',
-  rules         jsonb default '[]',
-  updated_at    timestamptz default now()
+-- Team Members Table
+create table if not exists team_members (
+  id           uuid default gen_random_uuid() primary key,
+  owner_email  text not null,
+  member_email text not null,
+  role         text default 'member',
+  status       text default 'pending',
+  created_at   timestamptz default now(),
+  unique(owner_email, member_email)
 );
 
--- Auto Reply Log Table
-create table if not exists auto_reply_log (
-  id            uuid default gen_random_uuid() primary key,
-  user_email    text not null,
-  from_email    text,
-  subject       text,
-  reply_sent    text,
-  quality_score int,
-  language      text,
-  created_at    timestamptz default now()
+-- Shared Replies Table
+create table if not exists shared_replies (
+  id             uuid default gen_random_uuid() primary key,
+  owner_email    text not null,
+  author_email   text not null,
+  customer_email text,
+  subject        text,
+  reply          text,
+  quality_score  int,
+  language       text,
+  tone           text,
+  note           text default '',
+  comment        text default '',
+  status         text default 'pending',
+  created_at     timestamptz default now(),
+  updated_at     timestamptz default now()
 );
 
--- Subscriptions Table (if not already created)
-create table if not exists subscriptions (
-  id              uuid default gen_random_uuid() primary key,
-  email           text not null,
-  plan            text default 'free',
-  status          text default 'active',
-  stripe_customer text,
-  updated_at      timestamptz default now()
-);
+-- Enable RLS
+alter table team_members  enable row level security;
+alter table shared_replies enable row level security;
 
--- Enable Row Level Security
-alter table auto_reply_settings enable row level security;
-alter table auto_reply_log       enable row level security;
-alter table subscriptions        enable row level security;
+-- Policies
+create policy "Owner can manage team"
+  on team_members for all
+  using (owner_email = auth.email());
 
--- Policies (service role bypasses these)
-create policy "Users can read own settings"
-  on auto_reply_settings for select
-  using (email = auth.email());
+create policy "Members can read their team"
+  on team_members for select
+  using (member_email = auth.email());
 
-create policy "Users can read own logs"
-  on auto_reply_log for select
-  using (user_email = auth.email());
+create policy "Owner can manage shared replies"
+  on shared_replies for all
+  using (owner_email = auth.email());
+
+create policy "Authors can insert shared replies"
+  on shared_replies for insert
+  with check (author_email = auth.email());
+
+-- Indexes for performance
+create index if not exists idx_team_members_owner  on team_members(owner_email);
+create index if not exists idx_team_members_member on team_members(member_email);
+create index if not exists idx_shared_replies_owner on shared_replies(owner_email);

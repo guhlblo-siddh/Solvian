@@ -8,6 +8,7 @@ import Pricing            from './Pricing'
 import Gmail              from './Gmail'
 import AutoReply          from './AutoReply'
 import Dashboard          from './Dashboard'
+import Team               from './Team'
 import { PlanBadge }      from './PlanBadge'
 import { usePlan }        from '../hooks/usePlan'
 import { useIsMobile }    from '../hooks/useIsMobile'
@@ -17,25 +18,25 @@ const NAV = [
   { id: 'compose',   icon: '✍️', label: 'Compose'   },
   { id: 'gmail',     icon: '📬', label: 'Gmail'     },
   { id: 'autoreply', icon: '🤖', label: 'Auto'      },
-  { id: 'dashboard', icon: '📊', label: 'Stats'     },
+  { id: 'dashboard', icon: '📊', label: 'Dashboard' },
+  { id: 'team',      icon: '👥', label: 'Team'      },
   { id: 'saved',     icon: '📁', label: 'Saved'     },
   { id: 'pricing',   icon: '⚡', label: 'Upgrade'   },
   { id: 'settings',  icon: '⚙️', label: 'Settings'  },
 ]
 
-// Bottom nav shows only 5 items on mobile
 const MOBILE_NAV = [
   { id: 'compose',   icon: '✍️', label: 'Compose'  },
   { id: 'gmail',     icon: '📬', label: 'Gmail'    },
   { id: 'dashboard', icon: '📊', label: 'Stats'    },
-  { id: 'saved',     icon: '📁', label: 'Saved'    },
+  { id: 'team',      icon: '👥', label: 'Team'     },
   { id: 'settings',  icon: '⚙️', label: 'More'     },
 ]
 
 export default function Layout({ user, onBack, onLogout }) {
-  const [nav, setNav]           = useState('compose')
-  const [saved, setSaved]       = useState([])
-  const [history, setHistory]   = useState([])
+  const [nav, setNav]                   = useState('compose')
+  const [saved, setSaved]               = useState([])
+  const [history, setHistory]           = useState([])
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
 
@@ -65,20 +66,16 @@ export default function Layout({ user, onBack, onLogout }) {
           </div>
         )}
 
-        {/* Right side */}
+        {/* Right */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, position: 'relative' }}>
           {!isMobile && !planData.loadingPlan && (
             <PlanBadge plan={planData.plan} usage={planData.usage} limit={planData.limit} remaining={planData.remaining} />
           )}
 
-          {/* Mobile: hamburger menu */}
           {isMobile && (
-            <button onClick={() => setShowMobileMenu(true)} style={{ background: 'none', border: 'none', color: '#475569', cursor: 'pointer', fontSize: 20, padding: '4px 6px', display: 'flex', alignItems: 'center' }}>
-              ☰
-            </button>
+            <button onClick={() => setShowMobileMenu(true)} style={{ background: 'none', border: 'none', color: '#475569', cursor: 'pointer', fontSize: 20, padding: '4px 6px' }}>☰</button>
           )}
 
-          {/* Avatar */}
           <button onClick={() => setShowUserMenu(v => !v)} style={{ width: 32, height: 32, borderRadius: 8, background: GRAD, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: 12, boxShadow: '0 0 12px rgba(99,102,241,0.3)', flexShrink: 0 }}>
             {initials}
           </button>
@@ -88,15 +85,18 @@ export default function Layout({ user, onBack, onLogout }) {
               <div style={{ padding: '8px 12px', borderBottom: '1px solid #1e2033', marginBottom: 6 }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: '#f1f5f9', marginBottom: 2 }}>{initials}</div>
                 <div style={{ fontSize: 11, color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email}</div>
-                {!planData.loadingPlan && isMobile && (
+                {isMobile && !planData.loadingPlan && (
                   <div style={{ fontSize: 11, color: '#6366f1', marginTop: 3, fontWeight: 600 }}>
-                    {planData.plan.charAt(0).toUpperCase() + planData.plan.slice(1)} Plan
-                    {planData.limit !== Infinity && ` · ${planData.remaining} left`}
+                    {planData.plan.charAt(0).toUpperCase() + planData.plan.slice(1)} · {planData.limit !== Infinity ? `${planData.remaining} left` : '∞'}
                   </div>
                 )}
               </div>
               {[
-                { label: '⚡ Upgrade Plan', id: 'pricing'   },
+                { label: '📬 Gmail',        id: 'gmail'     },
+                { label: '🤖 Auto-Reply',   id: 'autoreply' },
+                { label: '👥 Team',         id: 'team'      },
+                { label: '📊 Dashboard',    id: 'dashboard' },
+                { label: '⚡ Upgrade',      id: 'pricing'   },
                 { label: '⚙️ Settings',     id: 'settings'  },
               ].map(item => (
                 <button key={item.id} onClick={() => { setNav(item.id); setShowUserMenu(false) }} style={{ width: '100%', padding: '8px 12px', background: 'none', border: 'none', color: '#94a3b8', fontSize: 13, textAlign: 'left', cursor: 'pointer', borderRadius: 7 }}
@@ -104,6 +104,7 @@ export default function Layout({ user, onBack, onLogout }) {
                   onMouseLeave={e => e.target.style.background = 'none'}
                 >{item.label}</button>
               ))}
+              <div style={{ height: 1, background: '#1e2033', margin: '4px 0' }} />
               <button onClick={() => { setShowUserMenu(false); onLogout() }} style={{ width: '100%', padding: '8px 12px', background: 'none', border: 'none', color: '#f87171', fontSize: 13, textAlign: 'left', cursor: 'pointer', borderRadius: 7 }}
                 onMouseEnter={e => e.target.style.background = 'rgba(239,68,68,0.07)'}
                 onMouseLeave={e => e.target.style.background = 'none'}
@@ -113,12 +114,12 @@ export default function Layout({ user, onBack, onLogout }) {
         </div>
       </header>
 
-      {/* ── MOBILE SLIDE-IN MENU ── */}
+      {/* ── MOBILE SLIDE MENU ── */}
       {showMobileMenu && (
         <>
           <div onClick={() => setShowMobileMenu(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', zIndex: 40 }} />
-          <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 260, background: '#0d0d1a', border: '1px solid #1e2033', zIndex: 50, padding: 20, display: 'flex', flexDirection: 'column', gap: 6, overflowY: 'auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 260, background: '#0d0d1a', borderLeft: '1px solid #1e2033', zIndex: 50, padding: 20, display: 'flex', flexDirection: 'column', gap: 4, overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <span style={{ fontSize: 14, fontWeight: 700, color: '#f1f5f9' }}>Menu</span>
               <button onClick={() => setShowMobileMenu(false)} style={{ background: 'none', border: 'none', color: '#475569', cursor: 'pointer', fontSize: 20 }}>✕</button>
             </div>
@@ -140,6 +141,7 @@ export default function Layout({ user, onBack, onLogout }) {
       {nav === 'gmail'     && <Gmail      planData={planData} onUpgrade={() => setNav('pricing')} isMobile={isMobile} />}
       {nav === 'autoreply' && <AutoReply  user={user} isMobile={isMobile} />}
       {nav === 'dashboard' && <Dashboard  user={user} planData={planData} onUpgrade={() => setNav('pricing')} isMobile={isMobile} />}
+      {nav === 'team'      && <Team       user={user} isMobile={isMobile} />}
       {nav === 'saved'     && <Saved      saved={saved} setSaved={setSaved} isMobile={isMobile} />}
       {nav === 'pricing'   && <Pricing    user={user} currentPlan={planData.plan} isMobile={isMobile} />}
       {nav === 'settings'  && <Settings   user={user} onLogout={onLogout} planData={planData} onUpgrade={() => setNav('pricing')} isMobile={isMobile} />}
@@ -148,34 +150,27 @@ export default function Layout({ user, onBack, onLogout }) {
       {isMobile && (
         <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, height: 64, background: 'rgba(8,8,15,0.97)', backdropFilter: 'blur(16px)', borderTop: '1px solid #1e2033', display: 'flex', alignItems: 'center', justifyContent: 'space-around', zIndex: 20, paddingBottom: 'env(safe-area-inset-bottom)' }}>
           {MOBILE_NAV.map(n => (
-            <button key={n.id} onClick={() => n.id === 'settings' ? setShowMobileMenu(true) : setNav(n.id)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', padding: '6px 12px', borderRadius: 10, flex: 1, transition: 'all 0.15s', position: 'relative' }}>
+            <button key={n.id} onClick={() => n.id === 'settings' ? setShowMobileMenu(true) : setNav(n.id)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', padding: '6px 12px', borderRadius: 10, flex: 1, position: 'relative', WebkitTapHighlightColor: 'transparent' }}>
               <span style={{ fontSize: 20 }}>{n.icon}</span>
-              <span style={{ fontSize: 10, fontWeight: nav === n.id ? 600 : 400, color: nav === n.id ? '#a5b4fc' : '#475569', transition: 'color 0.15s' }}>{n.label}</span>
+              <span style={{ fontSize: 10, fontWeight: nav === n.id ? 600 : 400, color: nav === n.id ? '#a5b4fc' : '#475569' }}>{n.label}</span>
               {nav === n.id && <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 20, height: 2, borderRadius: 99, background: GRAD }} />}
-              {n.id === 'saved' && saved.length > 0 && (
-                <div style={{ position: 'absolute', top: 4, right: 14, width: 8, height: 8, borderRadius: '50%', background: '#6366f1' }} />
-              )}
             </button>
           ))}
         </nav>
       )}
 
-      {(showUserMenu || showMobileMenu) && !showMobileMenu && (
-        <div onClick={() => setShowUserMenu(false)} style={{ position: 'fixed', inset: 0, zIndex: 90 }} />
-      )}
+      {showUserMenu && <div onClick={() => setShowUserMenu(false)} style={{ position: 'fixed', inset: 0, zIndex: 90 }} />}
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-        @keyframes spin    { to { transform: rotate(360deg) } }
-        @keyframes fadeUp  { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:translateY(0) } }
-        @keyframes slideIn { from { transform:translateX(100%) } to { transform:translateX(0) } }
+        @keyframes spin   { to { transform: rotate(360deg) } }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:translateY(0) } }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         input::placeholder, textarea::placeholder { color: #334155; }
         select option { background: #0f0f1a; }
         body { background: #08080f; }
-        @media (max-width: 768px) {
-          ::-webkit-scrollbar { display: none; }
-        }
+        button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        @media (max-width: 768px) { ::-webkit-scrollbar { display: none; } }
       `}</style>
     </div>
   )
