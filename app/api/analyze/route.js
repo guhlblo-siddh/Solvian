@@ -1,24 +1,25 @@
 import Stripe from 'stripe'
 
+const PRICES = {
+  starter:  'price_starter_id_from_stripe',
+  standard: 'price_standard_id_from_stripe',
+  pro:      'price_pro_id_from_stripe',
+}
+
 export async function POST(req) {
   try {
     const { plan, email } = await req.json()
 
-    // ✅ Safety check: verhindert Build-Crash
-    if (!process.env.STRIPE_SECRET_KEY) {
+    const secretKey = process.env.STRIPE_SECRET_KEY
+
+    if (!secretKey) {
       return Response.json(
-        { error: 'Missing STRIPE_SECRET_KEY' },
+        { error: 'Missing STRIPE_SECRET_KEY in environment variables' },
         { status: 500 }
       )
     }
 
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
-
-    const PRICES = {
-      starter:  'price_starter_id_from_stripe',
-      standard: 'price_standard_id_from_stripe',
-      pro:      'price_pro_id_from_stripe',
-    }
+    const stripe = new Stripe(secretKey)
 
     if (!PRICES[plan]) {
       return Response.json({ error: 'Invalid plan' }, { status: 400 })
@@ -40,6 +41,7 @@ export async function POST(req) {
     })
 
     return Response.json({ url: session.url })
+
   } catch (err) {
     return Response.json({ error: err.message }, { status: 500 })
   }
