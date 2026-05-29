@@ -400,9 +400,6 @@ function StatusBadge({ status }) {
   )
 }
 
-function FieldLabel({ children }) {
-  return <div style={{ fontSize: 12, color: '#475569', marginBottom: 4 }}>{children}</div>
-}
 
 function Tag({ children, color }) {
   return <span style={{ fontSize: 10, color, background: `${color}18`, border: `1px solid ${color}30`, padding: '2px 7px', borderRadius: 99, fontWeight: 500 }}>{children}</span>
